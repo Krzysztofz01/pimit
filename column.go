@@ -8,7 +8,7 @@ import (
 )
 
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
-// function allowing you to read the color and coordinates.
+// function allowing you to read the color and coordinates. Every column is iterated in a separate goroutine.
 func ParallelColumnRead(i image.Image, a ReadAccess) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -39,7 +39,7 @@ func ParallelColumnRead(i image.Image, a ReadAccess) {
 }
 
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
-// function allowing you to read only the color.
+// function allowing you to read only the color. Every column is iterated in a separate goroutine.
 func ParallelColumnColorRead(i image.Image, a ReadColorAccess) {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -50,7 +50,8 @@ func ParallelColumnColorRead(i image.Image, a ReadColorAccess) {
 
 // Perform parallel reading and editing of pixels of the passed image. For each pixel, execute the passed access
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
-// after this operation. The changes will be applied to the passed image instance.
+// after this operation. The changes will be applied to the passed image instance. Every column is iterated in a
+// separate goroutine.
 func ParallelColumnReadWrite(i draw.Image, a ReadWriteAccess) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -84,7 +85,8 @@ func ParallelColumnReadWrite(i draw.Image, a ReadWriteAccess) {
 
 // Perform parallel reading and editing of pixels of the passed image. For each pixel, execute the passed access
 // function allowing to read only the color, which will return the color that the pixel should take after this
-// operation. The changes will be applied to the passed image instance.
+// operation. The changes will be applied to the passed image instance.  Every column is iterated in a separate
+// goroutine.
 func ParallelColumnColorReadWrite(i draw.Image, a ReadWriteColorAccess) {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -95,7 +97,8 @@ func ParallelColumnColorReadWrite(i draw.Image, a ReadWriteColorAccess) {
 
 // Perform parallel reading and editing of pixels of the passed image. For each pixel, execute the passed access
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
-// after this operation. The changes will be applied to a new image instance returned from this function.
+// after this operation. The changes will be applied to a new image instance returned from this function. Every
+// column is iterated in a separate goroutine.
 func ParallelColumnReadWriteNew(i image.Image, a ReadWriteAccess) image.Image {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -133,7 +136,7 @@ func ParallelColumnReadWriteNew(i image.Image, a ReadWriteAccess) image.Image {
 // Perform parallel reading and editing of pixels of the passed image. For each pixel, execute the passed access
 // function allowing to read only the color, which will return the color that the pixel should take after this
 // operation. The changes will be applied to the passed image instance. The changes will be applied to a new image
-// instance returned from this function.
+// instance returned from this function. Every column is iterated in a separate goroutine.
 func ParallelColumnColorReadWriteNew(i image.Image, a ReadWriteColorAccess) image.Image {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
