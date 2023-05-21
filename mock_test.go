@@ -12,7 +12,7 @@ const (
 )
 
 func mockSpecificDrawableImage(width, height int, color color.Color) draw.Image {
-	img := image.NewRGBA(image.Rect(0, 0, mockImageWidth, mockImageHeight))
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	for x := 0; x < width; x += 1 {
 		for y := 0; y < height; y += 1 {
