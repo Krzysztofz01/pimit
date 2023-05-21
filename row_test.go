@@ -115,6 +115,39 @@ func TestPrallelRowReadWriteShouldCorrectlyIterate(t *testing.T) {
 	}
 }
 
+func TestParallelRowReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	image := mockWhiteDrawableImage()
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	ParallelRowReadWrite(image, func(_, _ int, col color.Color) color.Color {
+		rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+		if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+			return color.White
+		}
+
+		if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+			return color.Black
+		}
+
+		assert.FailNow(t, "This should never happen")
+		return col
+	})
+
+	for x := 0; x < image.Bounds().Dx(); x += 1 {
+		for y := 0; y < image.Bounds().Dy(); y += 1 {
+			acR, acG, acB, acA := image.At(x, y).RGBA()
+
+			assert.Equal(t, rBlack, acR)
+			assert.Equal(t, gBlack, acG)
+			assert.Equal(t, bBlack, acB)
+			assert.Equal(t, aBlack, acA)
+		}
+	}
+}
+
 func TestParallelRowColorReadWriteShouldPanicOnNilImage(t *testing.T) {
 	assert.Panics(t, func() {
 		ParallelRowColorReadWrite(nil, func(c color.Color) color.Color {
@@ -154,6 +187,39 @@ func TestPrallelRowColorReadWriteShouldCorrectlyIterate(t *testing.T) {
 	for x := 0; x < expectedImage.Bounds().Dx(); x += 1 {
 		for y := 0; y < expectedImage.Bounds().Dy(); y += 1 {
 			assert.Equal(t, expectedImage.At(x, y), img.At(x, y))
+		}
+	}
+}
+
+func TestParallelRowColorReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	image := mockWhiteDrawableImage()
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	ParallelRowColorReadWrite(image, func(col color.Color) color.Color {
+		rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+		if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+			return color.White
+		}
+
+		if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+			return color.Black
+		}
+
+		assert.FailNow(t, "This should never happen")
+		return col
+	})
+
+	for x := 0; x < image.Bounds().Dx(); x += 1 {
+		for y := 0; y < image.Bounds().Dy(); y += 1 {
+			acR, acG, acB, acA := image.At(x, y).RGBA()
+
+			assert.Equal(t, rBlack, acR)
+			assert.Equal(t, gBlack, acG)
+			assert.Equal(t, bBlack, acB)
+			assert.Equal(t, aBlack, acA)
 		}
 	}
 }
@@ -209,6 +275,39 @@ func TestPrallelRowReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 	}
 }
 
+func TestParallelRowReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
+	image := mockWhiteDrawableImage()
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	actualImage := ParallelRowReadWriteNew(image, func(_, _ int, col color.Color) color.Color {
+		rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+		if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+			return color.White
+		}
+
+		if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+			return color.Black
+		}
+
+		assert.FailNow(t, "This should never happen")
+		return col
+	})
+
+	for x := 0; x < image.Bounds().Dx(); x += 1 {
+		for y := 0; y < image.Bounds().Dy(); y += 1 {
+			acR, acG, acB, acA := actualImage.At(x, y).RGBA()
+
+			assert.Equal(t, rBlack, acR)
+			assert.Equal(t, gBlack, acG)
+			assert.Equal(t, bBlack, acB)
+			assert.Equal(t, aBlack, acA)
+		}
+	}
+}
+
 func TestParallelRowColorReadWriteNewShouldPanicOnNilImage(t *testing.T) {
 	assert.Panics(t, func() {
 		ParallelRowColorReadWriteNew(nil, func(c color.Color) color.Color {
@@ -254,6 +353,39 @@ func TestPrallelRowColorReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 			assert.Equal(t, exG, acG)
 			assert.Equal(t, exB, acB)
 			assert.Equal(t, exA, acA)
+		}
+	}
+}
+
+func TestParallelRowColorReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
+	image := mockWhiteDrawableImage()
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	actualImage := ParallelRowColorReadWriteNew(image, func(col color.Color) color.Color {
+		rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+		if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+			return color.White
+		}
+
+		if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+			return color.Black
+		}
+
+		assert.FailNow(t, "This should never happen")
+		return col
+	})
+
+	for x := 0; x < image.Bounds().Dx(); x += 1 {
+		for y := 0; y < image.Bounds().Dy(); y += 1 {
+			acR, acG, acB, acA := actualImage.At(x, y).RGBA()
+
+			assert.Equal(t, rBlack, acR)
+			assert.Equal(t, gBlack, acG)
+			assert.Equal(t, bBlack, acB)
+			assert.Equal(t, aBlack, acA)
 		}
 	}
 }
