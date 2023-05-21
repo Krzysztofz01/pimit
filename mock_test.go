@@ -11,34 +11,30 @@ const (
 	mockImageHeight = 5
 )
 
-func mockWhiteDrawableImage() draw.Image {
+func mockSpecificDrawableImage(width, height int, color color.Color) draw.Image {
 	img := image.NewRGBA(image.Rect(0, 0, mockImageWidth, mockImageHeight))
 
-	for x := 0; x < mockImageWidth; x += 1 {
-		for y := 0; y < mockImageHeight; y += 1 {
-			img.Set(x, y, color.White)
+	for x := 0; x < width; x += 1 {
+		for y := 0; y < height; y += 1 {
+			img.Set(x, y, color)
 		}
 	}
 
 	return img
+}
+
+func mockWhiteDrawableImage() draw.Image {
+	return mockSpecificDrawableImage(mockImageWidth, mockImageHeight, color.White)
 }
 
 func mockWhiteImage() image.Image {
-	return mockWhiteDrawableImage()
+	return mockSpecificDrawableImage(mockImageWidth, mockImageHeight, color.White)
 }
 
 func mockBlackDrawableImage() draw.Image {
-	img := image.NewRGBA(image.Rect(0, 0, mockImageWidth, mockImageHeight))
-
-	for x := 0; x < mockImageWidth; x += 1 {
-		for y := 0; y < mockImageHeight; y += 1 {
-			img.Set(x, y, color.Black)
-		}
-	}
-
-	return img
+	return mockSpecificDrawableImage(mockImageWidth, mockImageHeight, color.Black)
 }
 
 func mockBlackImage() image.Image {
-	return mockBlackDrawableImage()
+	return mockSpecificDrawableImage(mockImageWidth, mockImageHeight, color.Black)
 }
