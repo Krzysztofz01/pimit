@@ -30,6 +30,10 @@ func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess)
 		panic("pimit: the provided access function is nil")
 	}
 
+	if c <= 0 {
+		panic("pimit: the provided negative or zero cluster size is invalid")
+	}
+
 	width := i.Bounds().Dx()
 	height := i.Bounds().Dy()
 
