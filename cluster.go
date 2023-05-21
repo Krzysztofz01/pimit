@@ -1,10 +1,11 @@
 package pimit
 
 import (
-	"image"
 	"image/draw"
 	"sync"
 )
+
+// TODO: Implement a version of ParallelClusterDistributedReadWrite with a limit parameter limiting the goroutines count to a ceratain pool
 
 func offsetToIndex(offset, width int) (int, int) {
 	if offset < 0 {
@@ -72,8 +73,4 @@ func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess)
 	}
 
 	wg.Wait()
-}
-
-func ParallelClusterLimitedReadWrite(i image.Image, c, l int, a ReadWriteAccess) {
-	// TODO: Implementation
 }
