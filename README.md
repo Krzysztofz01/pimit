@@ -26,7 +26,7 @@ image := CreateExampleImage()
 height := image.Bounds().Dy()
 width := image.Bounds().Dx()
 
-for y := 0; y < width; y += 1 {
+for y := 0; y < height; y += 1 {
     for x := 0; x < width; x += 1 {
         color := image.At(xIndex, yIndex)
         fmt.Print(color)
@@ -48,9 +48,9 @@ A quick example of making the picture black and white using parallel row iterati
 image := CreateExampleImage()
 
 ParallelRowColorReadWrite(img, func(c color.Color) color.Color {
-		rgb, _ := c.(color.RGBA)
-		value := uint8(0.299*float32(rgb.R) + 0.587*float32(rgb.G) + 0.114*float32(rgb.B))
-		
-		return color.RGBA{value, value, value, 0xff}
+    rgb, _ := c.(color.RGBA)
+    value := uint8(0.299*float32(rgb.R) + 0.587*float32(rgb.G) + 0.114*float32(rgb.B))
+
+    return color.RGBA{value, value, value, 0xff}
 })
 ```
