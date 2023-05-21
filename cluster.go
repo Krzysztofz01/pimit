@@ -35,31 +35,30 @@ func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess)
 
 	pixelCount := width * height
 
-	clusterLengthBase := pixelCount / c
-	clusterLengthRemaining := pixelCount % c
+	clusterBaseLength := pixelCount / c
+	clusterRemnantLength := pixelCount % c
 
 	wg := sync.WaitGroup{}
 	wg.Add(c)
 
-	for offsetMultiplier := 0; offsetMultiplier < c; offsetMultiplier += 1 {
-		targetClusterOffset := offsetMultiplier * clusterLengthBase
-		targetClusterLength := clusterLengthBase
-		if offsetMultiplier+1 == c {
-			targetClusterLength = clusterLengthRemaining
+	for offsetFactor := 0; offsetFactor < c; offsetFactor += 1 {
+		targetClusterOffset := offsetFactor * clusterBaseLength
+		targetClusterLength := clusterBaseLength
+		if offsetFactor+1 == c {
+			targetClusterLength += clusterRemnantLength
 		}
 
-		go func(startingOffset, clusterLength int) {
+		func(offset, length int) {
 			defer wg.Done()
 
-			for innerOffset := 0; innerOffset < clusterLength; innerOffset += 1 {
-				currentOffset := innerOffset + startingOffset
-
-				xIndex, yIndex := offsetToIndex(currentOffset+startingOffset, width)
+			for offsetIteration := 0; offsetIteration < length; offsetIteration += 1 {
+				xIndex, yIndex := offsetToIndex(offset+offsetIteration, width)
 
 				currentColor := i.At(xIndex, yIndex)
 				modifiedColor := a(xIndex, yIndex, currentColor)
 
 				i.Set(xIndex, yIndex, modifiedColor)
+
 			}
 		}(targetClusterOffset, targetClusterLength)
 	}
