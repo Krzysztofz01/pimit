@@ -8,6 +8,8 @@
 
 A minimalist library that adds functionality to wrap logic for concurrent iteration over images. The library contains various types of functions that allow parallel iteration over images for reading or writing. It is also possible to indicate whether the concurrent iteration is to be performed against columns, rows or clusters. Thanks to this library, it is possible to clean up the code fragments in which you perform image processing by separating the parts of the code related to iteration and concurrent operations. Thanks to the concurrent operation of these iterators, it is possible to increase the performance of the algorithm at the expense of a small increase in memory consumption.
 
+The current state of the library strongly **contradicts the YAGNI rule**, due to the large number of combinations of functions whose functionality is very similar. The library in its current state can not be considered finished. Which functions are most needed and which will remain in the library will become clear after some time of using it.
+
 ## Installation
 ```
 go get -u github.com/Krzysztofz01/pimit
