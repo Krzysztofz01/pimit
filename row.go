@@ -8,6 +8,33 @@ import (
 	"sync"
 )
 
+// Perform a parallel iteration of the indexes according to the width and height indicated by the parameters. For
+// each combination of indexes excute the passed access function. Each row is iterated in a separate goroutine.
+func ParallelRowIndices(w, h int, a IndicesAccess) {
+	if w <= 0 {
+		panic("pimit: the provided nagative or zero width is invalid")
+	}
+
+	if h <= 0 {
+		panic("pimit: the provided negative or zero height is invalid")
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(h)
+
+	for y := 0; y < h; y += 1 {
+		go func(yIndex int) {
+			defer wg.Done()
+
+			for xIndex := 0; xIndex < w; xIndex += 1 {
+				a(xIndex, yIndex)
+			}
+		}(y)
+	}
+
+	wg.Wait()
+}
+
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read the color and coordinates. Every row is iterated in a separate goroutine.
 func ParallelRowRead(i image.Image, a ReadAccess) {
@@ -23,7 +50,7 @@ func ParallelRowRead(i image.Image, a ReadAccess) {
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
 	for y := 0; y < height; y += 1 {
 		go func(yIndex int) {
@@ -65,9 +92,9 @@ func ParallelRowReadE(i image.Image, a ReadAccessE) error {
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
-	iterationErrors := make(chan error, width)
+	iterationErrors := make(chan error, height)
 
 	for y := 0; y < height; y += 1 {
 		go func(yIndex int, errCh chan error) {
@@ -123,7 +150,7 @@ func ParallelRowReadWrite(i draw.Image, a ReadWriteAccess) {
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
 	for y := 0; y < height; y += 1 {
 		go func(yIndex int) {
@@ -170,9 +197,9 @@ func ParallelRowReadWriteE(i draw.Image, a ReadWriteAccessE) error {
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
-	iterationErrors := make(chan error, width)
+	iterationErrors := make(chan error, height)
 
 	for y := 0; y < height; y += 1 {
 		go func(yIndex int, errCh chan error) {
@@ -231,7 +258,7 @@ func ParallelRowReadWriteNew(i image.Image, a ReadWriteAccess) image.Image {
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
 	outputImage := image.NewNRGBA(image.Rect(0, 0, width, height))
 
@@ -282,9 +309,9 @@ func ParallelRowReadWriteNewE(i image.Image, a ReadWriteAccessE) (image.Image, e
 	height := i.Bounds().Dy()
 
 	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg.Add(height)
 
-	iterationErrors := make(chan error, width)
+	iterationErrors := make(chan error, height)
 
 	outputImage := image.NewNRGBA(image.Rect(0, 0, width, height))
 

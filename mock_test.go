@@ -8,7 +8,7 @@ import (
 
 const (
 	mockImageWidth  = 5
-	mockImageHeight = 5
+	mockImageHeight = 6
 )
 
 func mockSpecificDrawableImage(width, height int, color color.Color) draw.Image {
@@ -21,6 +21,19 @@ func mockSpecificDrawableImage(width, height int, color color.Color) draw.Image 
 	}
 
 	return img
+}
+
+func mockSpecificMatrix[T any](width, height int, value T) [][]T {
+	matrix := make([][]T, width)
+
+	for x := 0; x < width; x += 1 {
+		matrix[x] = make([]T, height)
+		for y := 0; y < height; y += 1 {
+			matrix[x][y] = value
+		}
+	}
+
+	return matrix
 }
 
 func mockWhiteDrawableImage() draw.Image {
