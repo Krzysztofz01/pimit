@@ -8,6 +8,33 @@ import (
 	"sync"
 )
 
+// Perform a parallel iteration of the indexes according to the width and height indicated by the parameters. For
+// each combination of indexes excute the passed access function. Each column is iterated in a separate goroutine.
+func ParallelColumnIndices(w, h int, a IndicesAccess) {
+	if w <= 0 {
+		panic("pimit: the provided nagative or zero width is invalid")
+	}
+
+	if h <= 0 {
+		panic("pimit: the provided negative or zero height is invalid")
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(w)
+
+	for x := 0; x < w; x += 1 {
+		go func(xIndex int) {
+			defer wg.Done()
+
+			for yIndex := 0; yIndex < h; yIndex += 1 {
+				a(xIndex, yIndex)
+			}
+		}(x)
+	}
+
+	wg.Wait()
+}
+
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read the color and coordinates. Every column is iterated in a separate goroutine.
 func ParallelColumnRead(i image.Image, a ReadAccess) {
