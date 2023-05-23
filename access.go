@@ -3,8 +3,11 @@ package pimit
 import "image/color"
 
 type accessFuncConstraint interface {
-	ReadAccess | ReadColorAccess | ReadWriteAccess | ReadWriteColorAccess | ReadAccessE | ReadColorAccessE | ReadWriteAccessE | ReadWriteColorAccessE
+	IndicesAccess | ReadAccess | ReadColorAccess | ReadWriteAccess | ReadWriteColorAccess | ReadAccessE | ReadColorAccessE | ReadWriteAccessE | ReadWriteColorAccessE
 }
+
+// Iteration access function. Allows you to read the coordinates.
+type IndicesAccess = func(xIndex, yIndex int)
 
 // Iteration access function. Allows you to read the coordinates of a pixel and its color.
 type ReadAccess = func(xIndex, yIndex int, color color.Color)
