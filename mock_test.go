@@ -8,7 +8,7 @@ import (
 
 const (
 	mockImageWidth  = 5
-	mockImageHeight = 5
+	mockImageHeight = 6
 )
 
 func mockSpecificDrawableImage(width, height int, color color.Color) draw.Image {

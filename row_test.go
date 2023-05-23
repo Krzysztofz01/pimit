@@ -8,6 +8,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParallelRowIndicesShouldPanicOnInvalidWidth(t *testing.T) {
+	assert.Panics(t, func() {
+		ParallelRowIndices(0, 2, func(xIndex, yIndex int) {})
+	})
+
+	assert.Panics(t, func() {
+		ParallelRowIndices(-2, 2, func(xIndex, yIndex int) {})
+	})
+}
+
+func TestParallelRowIndicesShouldPanicOnInvalidHeight(t *testing.T) {
+	assert.Panics(t, func() {
+		ParallelRowIndices(2, 0, func(xIndex, yIndex int) {})
+	})
+
+	assert.Panics(t, func() {
+		ParallelRowIndices(2, -2, func(xIndex, yIndex int) {})
+	})
+}
+
 func TestParallelRowReadShouldPanicOnNilImage(t *testing.T) {
 	assert.Panics(t, func() {
 		ParallelRowRead(nil, func(_, _ int, _ color.Color) {
