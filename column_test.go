@@ -63,7 +63,10 @@ func TestPrallelColumnReadShouldCorrectlyIterate(t *testing.T) {
 
 	ParallelColumnRead(img, func(xIndex, yIndex int, c color.Color) {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
 
 		acR, acG, acB, acA := c.RGBA()
 
@@ -107,7 +110,10 @@ func TestPrallelColumnReadEShouldCorrectlyIterate(t *testing.T) {
 
 	err := ParallelColumnReadE(img, func(xIndex, yIndex int, c color.Color) error {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
 
 		acR, acG, acB, acA := c.RGBA()
 
@@ -218,7 +224,11 @@ func TestPrallelColumnReadWriteShouldCorrectlyIterate(t *testing.T) {
 
 	ParallelColumnReadWrite(img, func(xIndex, yIndex int, c color.Color) color.Color {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)
@@ -306,7 +316,11 @@ func TestPrallelColumnReadWriteEShouldCorrectlyIterate(t *testing.T) {
 
 	ParallelColumnReadWriteE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)
@@ -552,7 +566,11 @@ func TestPrallelColumnReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 
 	actualImage := ParallelColumnReadWriteNew(img, func(xIndex, yIndex int, c color.Color) color.Color {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)
@@ -647,7 +665,11 @@ func TestPrallelColumnReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 
 	actualImage, err := ParallelColumnReadWriteNewE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)

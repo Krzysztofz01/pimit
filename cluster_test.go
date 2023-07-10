@@ -143,7 +143,11 @@ func TestParallelClusterDistributedReadWriteShouldCorrectlyIterate(t *testing.T)
 
 	ParallelClusterDistributedReadWrite(img, 2, func(xIndex, yIndex int, c color.Color) color.Color {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)
@@ -258,7 +262,11 @@ func TestParallelClusterDistributedReadWriteEShouldCorrectlyIterate(t *testing.T
 
 	ParallelClusterDistributedReadWriteE(img, 2, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
 		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
 		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
 		acR, acG, acB, acA := c.RGBA()
 
 		assert.Equal(t, exR, acR)
