@@ -28,6 +28,19 @@ func TestParallelColumnIndicesShouldPanicOnInvalidHeight(t *testing.T) {
 	})
 }
 
+func TestParallelColumnIndicesShouldCorrectlyIterate(t *testing.T) {
+	width := 10
+	height := 15
+
+	ParallelColumnIndices(width, height, func(xIndex, yIndex int) {
+		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, width)
+
+		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, height)
+	})
+}
+
 func TestParallelColumnReadShouldPanicOnNilImage(t *testing.T) {
 	assert.Panics(t, func() {
 		ParallelColumnRead(nil, func(_, _ int, _ color.Color) {
