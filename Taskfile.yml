@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  test:
+    desc: Run tests for all packages.
+    cmds:
+      - go test -v ./...
+
+  test:race:
+    desc: Run tests for all packages with additional data races check.
+    cmds:
+      - go test -v -race ./...
+
+  test:cover:
+    desc: Run tests for all packages and generate a coverage raport.
+    vars:
+      COVERAGE_FILE: coverage.out
+    cmds:
+      - go test -v -coverprofile {{.COVERAGE_FILE}} ./...
+      - go tool cover -html {{.COVERAGE_FILE}}

@@ -191,3 +191,13 @@ func TestParallelMatrixReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func TestIsMatrixSizeValidShouldReturnFalseOnInconsistentSizes(t *testing.T) {
+	matrix := make([][]bool, 2)
+	matrix[0] = make([]bool, 2)
+	matrix[1] = make([]bool, 1)
+
+	isValid := isMatrixSizeValid(matrix)
+
+	assert.False(t, isValid)
+}
