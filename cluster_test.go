@@ -6,15 +6,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/goleak"
 )
 
 func TestOffsetToIndexShouldPanicOnNegativeOffset(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		offsetToIndex(-2, 4)
 	})
 }
 
 func TestOffsetToIndexShouldPanicOnInvalidWidth(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		offsetToIndex(0, 0)
 	})
@@ -25,6 +30,8 @@ func TestOffsetToIndexShouldPanicOnInvalidWidth(t *testing.T) {
 }
 
 func TestOffsetToIndexShouldCalculate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	cases := map[struct {
 		offset int
 		width  int
@@ -53,6 +60,8 @@ func TestOffsetToIndexShouldCalculate(t *testing.T) {
 }
 
 func TestParallelClusterDistributedReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	cases := []struct {
 		width    int
 		height   int
@@ -105,6 +114,8 @@ func TestParallelClusterDistributedReadWriteShouldAccessPixelsOnce(t *testing.T)
 }
 
 func TestParallelClusterDistributedReadWriteShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelClusterDistributedReadWrite(nil, 2, func(_, _ int, c color.Color) color.Color {
 			return c
@@ -113,6 +124,8 @@ func TestParallelClusterDistributedReadWriteShouldPanicOnNilImage(t *testing.T) 
 }
 
 func TestParallelClusterDistributedReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -121,6 +134,8 @@ func TestParallelClusterDistributedReadWriteShouldPanicOnNilAccessFunc(t *testin
 }
 
 func TestParallelClusterDistributedReadWriteShouldPanicOnInvalidClusterCount(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -137,6 +152,8 @@ func TestParallelClusterDistributedReadWriteShouldPanicOnInvalidClusterCount(t *
 }
 
 func TestParallelClusterDistributedReadWriteShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -170,6 +187,8 @@ func TestParallelClusterDistributedReadWriteShouldCorrectlyIterate(t *testing.T)
 }
 
 func TestParallelClusterDistributedReadWriteEShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	cases := []struct {
 		width    int
 		height   int
@@ -224,6 +243,8 @@ func TestParallelClusterDistributedReadWriteEShouldAccessPixelsOnce(t *testing.T
 }
 
 func TestParallelClusterDistributedReadWriteEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelClusterDistributedReadWriteE(nil, 2, func(_, _ int, c color.Color) (color.Color, error) {
 			return c, nil
@@ -232,6 +253,8 @@ func TestParallelClusterDistributedReadWriteEShouldPanicOnNilImage(t *testing.T)
 }
 
 func TestParallelClusterDistributedReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -240,6 +263,8 @@ func TestParallelClusterDistributedReadWriteEShouldPanicOnNilAccessFunc(t *testi
 }
 
 func TestParallelClusterDistributedReadWriteEShouldPanicOnInvalidClusterCount(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -256,6 +281,8 @@ func TestParallelClusterDistributedReadWriteEShouldPanicOnInvalidClusterCount(t 
 }
 
 func TestParallelClusterDistributedReadWriteEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -289,6 +316,8 @@ func TestParallelClusterDistributedReadWriteEShouldCorrectlyIterate(t *testing.T
 }
 
 func TestParallelClusterDistributedReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	err := ParallelClusterDistributedReadWriteE(img, 2, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
