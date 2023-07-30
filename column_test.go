@@ -6,9 +6,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/goleak"
 )
 
 func TestParallelColumnIndicesShouldPanicOnInvalidWidth(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnIndices(0, 2, func(xIndex, yIndex int) {})
 	})
@@ -19,6 +22,8 @@ func TestParallelColumnIndicesShouldPanicOnInvalidWidth(t *testing.T) {
 }
 
 func TestParallelColumnIndicesShouldPanicOnInvalidHeight(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnIndices(2, 0, func(xIndex, yIndex int) {})
 	})
@@ -29,6 +34,8 @@ func TestParallelColumnIndicesShouldPanicOnInvalidHeight(t *testing.T) {
 }
 
 func TestParallelColumnIndicesShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	width := 10
 	height := 15
 
@@ -42,6 +49,8 @@ func TestParallelColumnIndicesShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnRead(nil, func(_, _ int, _ color.Color) {
 		})
@@ -49,6 +58,8 @@ func TestParallelColumnReadShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	assert.Panics(t, func() {
@@ -57,6 +68,8 @@ func TestParallelColumnReadShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestPrallelColumnReadShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -78,6 +91,8 @@ func TestPrallelColumnReadShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnReadE(nil, func(_, _ int, _ color.Color) error {
 			return nil
@@ -86,6 +101,8 @@ func TestParallelColumnReadEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	assert.Panics(t, func() {
@@ -94,6 +111,8 @@ func TestParallelColumnReadEShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestParallelColumnReadEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	err := ParallelColumnReadE(img, func(xIndex, yIndex int, c color.Color) error {
@@ -104,6 +123,8 @@ func TestParallelColumnReadEShouldReturnErrorOnAccessError(t *testing.T) {
 }
 
 func TestPrallelColumnReadEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -128,6 +149,8 @@ func TestPrallelColumnReadEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorRead(nil, func(_ color.Color) {
 		})
@@ -135,6 +158,8 @@ func TestParallelColumnColorReadShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	assert.Panics(t, func() {
@@ -143,6 +168,8 @@ func TestParallelColumnColorReadShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestPrallelColumnColorReadShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -158,6 +185,8 @@ func TestPrallelColumnColorReadShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorReadE(nil, func(_ color.Color) error {
 			return nil
@@ -166,6 +195,8 @@ func TestParallelColumnColorReadEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	assert.Panics(t, func() {
@@ -174,6 +205,8 @@ func TestParallelColumnColorReadEShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestParallelColumnColorReadEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	err := ParallelColumnColorReadE(img, func(c color.Color) error {
@@ -184,6 +217,8 @@ func TestParallelColumnColorReadEShouldReturnErrorOnAccessError(t *testing.T) {
 }
 
 func TestPrallelColumnColorReadEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -202,6 +237,8 @@ func TestPrallelColumnColorReadEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnReadWrite(nil, func(_, _ int, c color.Color) color.Color {
 			return c
@@ -210,6 +247,8 @@ func TestParallelColumnReadWriteShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -218,6 +257,8 @@ func TestParallelColumnReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestPrallelColumnReadWriteShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -251,6 +292,8 @@ func TestPrallelColumnReadWriteShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -284,6 +327,8 @@ func TestParallelColumnReadWriteShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnReadWriteE(nil, func(_, _ int, c color.Color) (color.Color, error) {
 			return c, nil
@@ -292,6 +337,8 @@ func TestParallelColumnReadWriteEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -300,6 +347,8 @@ func TestParallelColumnReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	err := ParallelColumnReadWriteE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
@@ -310,6 +359,8 @@ func TestParallelColumnReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 }
 
 func TestPrallelColumnReadWriteEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -343,6 +394,8 @@ func TestPrallelColumnReadWriteEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteEShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -378,6 +431,8 @@ func TestParallelColumnReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorReadWrite(nil, func(c color.Color) color.Color {
 			return c
@@ -386,6 +441,8 @@ func TestParallelColumnColorReadWriteShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -394,6 +451,8 @@ func TestParallelColumnColorReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestPrallelColumnColorReadWriteShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -421,6 +480,8 @@ func TestPrallelColumnColorReadWriteShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -454,6 +515,8 @@ func TestParallelColumnColorReadWriteShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorReadWriteE(nil, func(c color.Color) (color.Color, error) {
 			return c, nil
@@ -462,6 +525,8 @@ func TestParallelColumnColorReadWriteEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -470,6 +535,8 @@ func TestParallelColumnColorReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	err := ParallelColumnColorReadWriteE(img, func(c color.Color) (color.Color, error) {
@@ -480,6 +547,8 @@ func TestParallelColumnColorReadWriteEShouldReturnErrorOnAccessError(t *testing.
 }
 
 func TestPrallelColumnColorReadWriteEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -509,6 +578,8 @@ func TestPrallelColumnColorReadWriteEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteEShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -544,6 +615,8 @@ func TestParallelColumnColorReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnReadWriteNew(nil, func(_, _ int, c color.Color) color.Color {
 			return c
@@ -552,6 +625,8 @@ func TestParallelColumnReadWriteNewShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -560,6 +635,8 @@ func TestParallelColumnReadWriteNewShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestPrallelColumnReadWriteNewShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -599,6 +676,8 @@ func TestPrallelColumnReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -632,6 +711,8 @@ func TestParallelColumnReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnReadWriteNewE(nil, func(_, _ int, c color.Color) (color.Color, error) {
 			return c, nil
@@ -640,6 +721,8 @@ func TestParallelColumnReadWriteNewEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -648,6 +731,8 @@ func TestParallelColumnReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteNewEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	modifiedImg, err := ParallelColumnReadWriteNewE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
@@ -659,6 +744,8 @@ func TestParallelColumnReadWriteNewEShouldReturnErrorOnAccessError(t *testing.T)
 }
 
 func TestPrallelColumnReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -700,6 +787,8 @@ func TestPrallelColumnReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnReadWriteENewShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -735,6 +824,8 @@ func TestParallelColumnReadWriteENewShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorReadWriteNew(nil, func(c color.Color) color.Color {
 			return c
@@ -743,6 +834,8 @@ func TestParallelColumnColorReadWriteNewShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -751,6 +844,8 @@ func TestParallelColumnColorReadWriteNewShouldPanicOnNilAccessFunc(t *testing.T)
 }
 
 func TestPrallelColumnColorReadWriteNewShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -784,6 +879,8 @@ func TestPrallelColumnColorReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
@@ -817,6 +914,8 @@ func TestParallelColumnColorReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	assert.Panics(t, func() {
 		ParallelColumnColorReadWriteNewE(nil, func(c color.Color) (color.Color, error) {
 			return c, nil
@@ -825,6 +924,8 @@ func TestParallelColumnColorReadWriteNewEShouldPanicOnNilImage(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	assert.Panics(t, func() {
@@ -833,6 +934,8 @@ func TestParallelColumnColorReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T
 }
 
 func TestParallelColumnColorReadWriteNewEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	modifiedImg, err := ParallelColumnColorReadWriteNewE(img, func(c color.Color) (color.Color, error) {
@@ -844,6 +947,8 @@ func TestParallelColumnColorReadWriteNewEShouldReturnErrorOnAccessError(t *testi
 }
 
 func TestPrallelColumnColorReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	img := mockWhiteDrawableImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
@@ -879,6 +984,8 @@ func TestPrallelColumnColorReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 }
 
 func TestParallelColumnColorReadWriteNewEShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	image := mockWhiteDrawableImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
