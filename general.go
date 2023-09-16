@@ -108,7 +108,7 @@ func ParallelReadE(src image.Image, d ReadErrorableDelegate) error {
 
 				color := src.At(xIndex, yIndex)
 				if err := d(xIndex, yIndex, color); err != nil {
-					errt.Set(fmt.Errorf("pimit: delegate function failed om x:%d y:%d with: %w", xIndex, yIndex, err))
+					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
 					cancel()
 					return
 				}
@@ -192,7 +192,7 @@ func ParallelReadWriteE(src draw.Image, d ReadWriteErrorableDelegate) error {
 				color, err := d(xIndex, yIndex, color)
 
 				if err != nil {
-					errt.Set(fmt.Errorf("pimit: delegate function failed om x:%d y:%d with: %w", xIndex, yIndex, err))
+					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
 					cancel()
 					return
 				}
@@ -281,7 +281,7 @@ func ParallelReadWriteNewE(src image.Image, d ReadWriteErrorableDelegate) (draw.
 				color, err := d(xIndex, yIndex, color)
 
 				if err != nil {
-					errt.Set(fmt.Errorf("pimit: delegate function failed om x:%d y:%d with: %w", xIndex, yIndex, err))
+					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
 					cancel()
 					return
 				}
