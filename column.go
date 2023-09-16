@@ -10,6 +10,8 @@ import (
 
 // Perform a parallel iteration of the indexes according to the width and height indicated by the parameters. For
 // each combination of indexes excute the passed access function. Each column is iterated in a separate goroutine.
+//
+// Deprecated: Use ParallelIndices instead.
 func ParallelColumnIndices(w, h int, a IndicesAccess) {
 	if w <= 0 {
 		panic("pimit: the provided nagative or zero width is invalid")
@@ -37,6 +39,8 @@ func ParallelColumnIndices(w, h int, a IndicesAccess) {
 
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read the color and coordinates. Every column is iterated in a separate goroutine.
+//
+// Deprecated: Use ParallelRead function instead.
 func ParallelColumnRead(i image.Image, a ReadAccess) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -68,6 +72,8 @@ func ParallelColumnRead(i image.Image, a ReadAccess) {
 
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read only the color. Every column is iterated in a separate goroutine.
+//
+// Deprecated: Use ParallelRead instead.
 func ParallelColumnColorRead(i image.Image, a ReadColorAccess) {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -79,6 +85,8 @@ func ParallelColumnColorRead(i image.Image, a ReadColorAccess) {
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read the color and coordinates. Every column is iterated in a separate goroutine.
 // Errors that occur in the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Used ParallelReadE instead.
 func ParallelColumnReadE(i image.Image, a ReadAccessE) error {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -125,6 +133,8 @@ func ParallelColumnReadE(i image.Image, a ReadAccessE) error {
 // Perform a parallel reading of the pixels of the passed image. For each pixel, execute the passed access
 // function allowing you to read only the color. Every column is iterated in a separate goroutine. Errors
 // that occur in the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Use ParallelReadE instead.
 func ParallelColumnColorReadE(i image.Image, a ReadColorAccessE) error {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -137,6 +147,8 @@ func ParallelColumnColorReadE(i image.Image, a ReadColorAccessE) error {
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
 // after this operation. The changes will be applied to the passed image instance. Every column is iterated in a
 // separate goroutine.
+//
+// Deprecated: Use ParallelReadWrite instead.
 func ParallelColumnReadWrite(i draw.Image, a ReadWriteAccess) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -172,6 +184,8 @@ func ParallelColumnReadWrite(i draw.Image, a ReadWriteAccess) {
 // function allowing to read only the color, which will return the color that the pixel should take after this
 // operation. The changes will be applied to the passed image instance.  Every column is iterated in a separate
 // goroutine.
+//
+// Deprecated: Use ParallelReadWrite instead.
 func ParallelColumnColorReadWrite(i draw.Image, a ReadWriteColorAccess) {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -184,6 +198,8 @@ func ParallelColumnColorReadWrite(i draw.Image, a ReadWriteColorAccess) {
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
 // after this operation. The changes will be applied to the passed image instance. Every column is iterated in a
 // separate goroutine. Errors that occur in the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Use ParallelReadWriteE instead.
 func ParallelColumnReadWriteE(i draw.Image, a ReadWriteAccessE) error {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -234,6 +250,8 @@ func ParallelColumnReadWriteE(i draw.Image, a ReadWriteAccessE) error {
 // function allowing to read only the color, which will return the color that the pixel should take after this
 // operation. The changes will be applied to the passed image instance.  Every column is iterated in a separate
 // goroutine. Errors that occur in the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Use ParallelReadWriteE instead.
 func ParallelColumnColorReadWriteE(i draw.Image, a ReadWriteColorAccessE) error {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -246,6 +264,8 @@ func ParallelColumnColorReadWriteE(i draw.Image, a ReadWriteColorAccessE) error 
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
 // after this operation. The changes will be applied to a new image instance returned from this function. Every
 // column is iterated in a separate goroutine.
+//
+// Deprecated: Use ParallelReadWriteNew instead.
 func ParallelColumnReadWriteNew(i image.Image, a ReadWriteAccess) image.Image {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -284,6 +304,8 @@ func ParallelColumnReadWriteNew(i image.Image, a ReadWriteAccess) image.Image {
 // function allowing to read only the color, which will return the color that the pixel should take after this
 // operation. The changes will be applied to the passed image instance. The changes will be applied to a new image
 // instance returned from this function. Every column is iterated in a separate goroutine.
+//
+// Deprecated: Use ParallelReadWriteNew instead.
 func ParallelColumnColorReadWriteNew(i image.Image, a ReadWriteColorAccess) image.Image {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
@@ -297,6 +319,8 @@ func ParallelColumnColorReadWriteNew(i image.Image, a ReadWriteColorAccess) imag
 // after this operation. The changes will be applied to a new image instance returned from this function. Every
 // column is iterated in a separate goroutine. Errors that occur in the function will be caught and the first one
 // will be returned by the function.
+//
+// Deprecated: Use ParallelReadWriteNewE instead.
 func ParallelColumnReadWriteNewE(i image.Image, a ReadWriteAccessE) (image.Image, error) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -352,6 +376,8 @@ func ParallelColumnReadWriteNewE(i image.Image, a ReadWriteAccessE) (image.Image
 // operation. The changes will be applied to the passed image instance. The changes will be applied to a new image
 // instance returned from this function. Every column is iterated in a separate goroutine. Errors that occur in
 // the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Use ParallelReadWriteNewE instead.
 func ParallelColumnColorReadWriteNewE(i image.Image, a ReadWriteColorAccessE) (image.Image, error) {
 	if a == nil {
 		panic("pimit: the provided access function is nil")
