@@ -8,49 +8,52 @@ import (
 	"go.uber.org/goleak"
 )
 
-func TestIsMatrixSizeValidShouldValidateValidMatrices(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
-	cases := map[struct {
-		width  int
-		height int
-	}]bool{
-		{0, 0}: false,
-		{0, 1}: false,
-		{1, 0}: false,
-		{1, 1}: true,
-		{1, 2}: true,
-	}
-
-	for size, expected := range cases {
-		matrix := mockSpecificMatrix(size.width, size.height, true)
-		actual := isMatrixSizeValid(matrix)
-
-		assert.Equal(t, expected, actual)
-	}
-}
-
-func TestGetMatrixDimensionsShouldReturnValidDimensions(t *testing.T) {
+func TestGetMatrixSizeShouldTellIfValidAndReturnSize(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	cases := []struct {
-		width  int
-		height int
+		matrixWidth    int
+		matrixHeight   int
+		expectedOk     bool
+		expectedWidth  int
+		expectedHeight int
 	}{
-		{1, 1},
-		{2, 1},
-		{1, 2},
-		{3, 4},
-		{4, 4},
+		{0, 0, false, 0, 0},
+		{0, 1, false, 0, 0},
+		{1, 0, false, 0, 0},
+		{1, 1, false, 0, 0},
+		{1, 2, false, 0, 0},
+		{1, 1, true, 1, 1},
+		{2, 1, true, 2, 1},
+		{1, 2, true, 1, 2},
+		{3, 4, true, 3, 4},
+		{4, 4, true, 4, 4},
 	}
 
-	for _, expected := range cases {
-		matrix := mockSpecificMatrix(expected.width, expected.height, true)
-		actualWidth, actualHeight := getMatrixDimensions(matrix)
+	for _, c := range cases {
+		matrix := make([][]int, c.matrixWidth)
+		for mx := 0; mx < c.expectedWidth; mx += 1 {
+			matrix[mx] = make([]int, c.matrixHeight)
+		}
 
-		assert.Equal(t, expected.width, actualWidth)
-		assert.Equal(t, expected.height, actualHeight)
+		actualWidth, actualHeight, actualOk := getMatrixSize(matrix)
+
+		assert.Equal(t, c.expectedOk, actualOk)
+		assert.Equal(t, c.expectedWidth, actualWidth)
+		assert.Equal(t, c.expectedHeight, actualHeight)
 	}
+}
+
+func TestGetMatrixSizeShouldReturnFalseOnInconsistentSizes(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	matrix := make([][]bool, 2)
+	matrix[0] = make([]bool, 2)
+	matrix[1] = make([]bool, 1)
+
+	_, _, ok := getMatrixSize(matrix)
+
+	assert.False(t, ok)
 }
 
 func TestParallelMatrixReadWriteShouldPanicOnNilMatrix(t *testing.T) {
@@ -217,16 +220,4 @@ func TestParallelMatrixReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 	})
 
 	assert.NotNil(t, err)
-}
-
-func TestIsMatrixSizeValidShouldReturnFalseOnInconsistentSizes(t *testing.T) {
-	defer goleak.VerifyNone(t)
-
-	matrix := make([][]bool, 2)
-	matrix[0] = make([]bool, 2)
-	matrix[1] = make([]bool, 1)
-
-	isValid := isMatrixSizeValid(matrix)
-
-	assert.False(t, isValid)
 }
