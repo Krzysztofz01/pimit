@@ -59,7 +59,7 @@ func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess)
 			targetClusterLength += clusterRemnantLength
 		}
 
-		func(offset, length int) {
+		go func(offset, length int) {
 			defer wg.Done()
 
 			for offsetIteration := 0; offsetIteration < length; offsetIteration += 1 {
@@ -115,7 +115,7 @@ func ParallelClusterDistributedReadWriteE(i draw.Image, c int, a ReadWriteAccess
 			targetClusterLength += clusterRemnantLength
 		}
 
-		func(offset, length int, errCh chan error) {
+		go func(offset, length int, errCh chan error) {
 			defer wg.Done()
 
 			for offsetIteration := 0; offsetIteration < length; offsetIteration += 1 {
