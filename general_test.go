@@ -344,6 +344,274 @@ func TestParallelReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 	}
 }
 
+func TestParallelDistributedReadWriteShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	cases := []struct {
+		width    int
+		height   int
+		clusters int
+	}{
+		{2, 2, 2},
+		{2, 2, 2},
+		{2, 3, 2},
+		{3, 2, 2},
+		{3, 3, 2},
+		{2, 2, 3},
+		{2, 2, 3},
+		{2, 3, 3},
+		{3, 2, 3},
+		{3, 3, 3},
+	}
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	for _, c := range cases {
+		image := mockCustomDrawImage(c.width, c.height, color.White)
+
+		ParallelDistributedReadWrite(image, c.clusters, func(xIndex, yIndex int, col color.Color) color.Color {
+			rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+			if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+				return color.White
+			}
+
+			if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+				return color.Black
+			}
+
+			assert.FailNow(t, "This should never happen")
+			return col
+		})
+
+		for x := 0; x < c.width; x += 1 {
+			for y := 0; y < c.height; y += 1 {
+				acR, acG, acB, acA := image.At(x, y).RGBA()
+
+				assert.Equal(t, rBlack, acR)
+				assert.Equal(t, gBlack, acG)
+				assert.Equal(t, bBlack, acB)
+				assert.Equal(t, aBlack, acA)
+			}
+		}
+	}
+}
+
+func TestParallelDistributedReadWriteShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWrite(nil, 2, func(_, _ int, c color.Color) color.Color {
+			return c
+		})
+	})
+}
+
+func TestParallelDistributedReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWrite(img, 2, nil)
+	})
+}
+
+func TestParallelDistributedReadWriteShouldPanicOnInvalidClusterCount(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWrite(img, 0, func(_, _ int, c color.Color) color.Color {
+			return c
+		})
+	})
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWrite(img, -2, func(_, _ int, c color.Color) color.Color {
+			return c
+		})
+	})
+}
+
+func TestParallelDistributedReadWriteShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	exR, exG, exB, exA := color.White.RGBA()
+
+	ParallelDistributedReadWrite(img, 2, func(xIndex, yIndex int, c color.Color) color.Color {
+		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
+		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
+		acR, acG, acB, acA := c.RGBA()
+
+		assert.Equal(t, exR, acR)
+		assert.Equal(t, exG, acG)
+		assert.Equal(t, exB, acB)
+		assert.Equal(t, exA, acA)
+
+		return color.Black
+	})
+
+	expectedImage := mockBlackDrawImage()
+
+	assert.Equal(t, expectedImage.Bounds(), img.Bounds())
+
+	for x := 0; x < expectedImage.Bounds().Dx(); x += 1 {
+		for y := 0; y < expectedImage.Bounds().Dy(); y += 1 {
+			assert.Equal(t, expectedImage.At(x, y), img.At(x, y))
+		}
+	}
+}
+
+func TestParallelDistributedReadWriteEShouldAccessPixelsOnce(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	cases := []struct {
+		width    int
+		height   int
+		clusters int
+	}{
+		{2, 2, 2},
+		{2, 2, 2},
+		{2, 3, 2},
+		{3, 2, 2},
+		{3, 3, 2},
+		{2, 2, 3},
+		{2, 2, 3},
+		{2, 3, 3},
+		{3, 2, 3},
+		{3, 3, 3},
+	}
+
+	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
+	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
+
+	for _, c := range cases {
+		image := mockCustomDrawImage(c.width, c.height, color.White)
+
+		err := ParallelDistributedReadWriteE(image, c.clusters, func(xIndex, yIndex int, col color.Color) (color.Color, error) {
+			rCurrent, gCurrent, bCurrent, aCurrent := col.RGBA()
+
+			if rCurrent == rBlack && gCurrent == gBlack && bCurrent == bBlack && aCurrent == aBlack {
+				return color.White, nil
+			}
+
+			if rCurrent == rWhite && gCurrent == gWhite && bCurrent == bWhite && aCurrent == aWhite {
+				return color.Black, nil
+			}
+
+			assert.FailNow(t, "This should never happen")
+			return col, nil
+		})
+
+		assert.Nil(t, err)
+
+		for x := 0; x < c.width; x += 1 {
+			for y := 0; y < c.height; y += 1 {
+				acR, acG, acB, acA := image.At(x, y).RGBA()
+
+				assert.Equal(t, rBlack, acR)
+				assert.Equal(t, gBlack, acG)
+				assert.Equal(t, bBlack, acB)
+				assert.Equal(t, aBlack, acA)
+			}
+		}
+	}
+}
+
+func TestParallelDistributedReadWriteEShouldPanicOnNilImage(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWriteE(nil, 2, func(_, _ int, c color.Color) (color.Color, error) {
+			return c, nil
+		})
+	})
+}
+
+func TestParallelDistributedReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWriteE(img, 2, nil)
+	})
+}
+
+func TestParallelDistributedReadWriteEShouldPanicOnInvalidClusterCount(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWriteE(img, 0, func(_, _ int, c color.Color) (color.Color, error) {
+			return c, nil
+		})
+	})
+
+	assert.Panics(t, func() {
+		ParallelDistributedReadWriteE(img, -2, func(_, _ int, c color.Color) (color.Color, error) {
+			return c, nil
+		})
+	})
+}
+
+func TestParallelDistributedReadWriteEShouldCorrectlyIterate(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	exR, exG, exB, exA := color.White.RGBA()
+
+	ParallelDistributedReadWriteE(img, 2, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
+		assert.GreaterOrEqual(t, xIndex, 0)
+		assert.Less(t, xIndex, img.Bounds().Dx())
+
+		assert.GreaterOrEqual(t, yIndex, 0)
+		assert.Less(t, yIndex, img.Bounds().Dy())
+
+		acR, acG, acB, acA := c.RGBA()
+
+		assert.Equal(t, exR, acR)
+		assert.Equal(t, exG, acG)
+		assert.Equal(t, exB, acB)
+		assert.Equal(t, exA, acA)
+
+		return color.Black, nil
+	})
+
+	expectedImage := mockBlackDrawImage()
+
+	assert.Equal(t, expectedImage.Bounds(), img.Bounds())
+
+	for x := 0; x < expectedImage.Bounds().Dx(); x += 1 {
+		for y := 0; y < expectedImage.Bounds().Dy(); y += 1 {
+			assert.Equal(t, expectedImage.At(x, y), img.At(x, y))
+		}
+	}
+}
+
+func TestParallelDistributedReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	img := mockWhiteDrawImage()
+
+	err := ParallelDistributedReadWriteE(img, 2, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
+		return c, errors.New("pimit-test: test errror")
+	})
+
+	assert.NotNil(t, err)
+}
+
 func TestParallelReadWriteNewShouldPanicOnNilImage(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
@@ -551,6 +819,21 @@ func TestParallelReadWriteENewShouldAccessPixelsOnce(t *testing.T) {
 			assert.Equal(t, aBlack, acA)
 		}
 	}
+}
+
+func mockCustomDrawImage(w, h int, c color.Color) draw.Image {
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	for x := 0; x < w; x += 1 {
+		for y := 0; y < h; y += 1 {
+			img.Set(x, y, c)
+		}
+	}
+
+	return img
+}
+
+func mockCustomImageImage(w, h int, c color.Color) image.Image {
+	return mockCustomDrawImage(w, h, c)
 }
 
 func mockWhiteDrawImage() draw.Image {

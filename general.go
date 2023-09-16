@@ -208,6 +208,141 @@ func ParallelReadWriteE(src draw.Image, d ReadWriteErrorableDelegate) error {
 
 // Perform a parallel iteration of the pixels of the provided image. For each pixel, execute the delegate function
 // allowing you to read the color and coordinates, the delegate return color will be set at the given coordinates.
+// This changes will be applied to the passed image instance. The integer parameter is the number of clustes into
+// which the image will be devided. Each cluster is then iterated in a separate goroutine.
+func ParallelDistributedReadWrite(src draw.Image, c int, d ReadWriteDelegate) {
+	if src == nil {
+		panic("pimit: the provided image reference is nil")
+	}
+
+	if c <= 0 {
+		panic("pimit: the provided negative or zero distribution cluster size is invalid")
+	}
+
+	if d == nil {
+		panic("pimit: the provided access delegate function is nil")
+	}
+
+	width := src.Bounds().Dx()
+	height := src.Bounds().Dy()
+
+	pCount := width * height
+	cCount := pCount / c
+	cLeft := pCount % c
+
+	wg := &sync.WaitGroup{}
+
+	for offsetFactor := 0; offsetFactor < c; offsetFactor += 1 {
+		cOffset := cCount * offsetFactor
+		cLength := cCount
+		if offsetFactor+1 == c {
+			cLength += cLeft
+		}
+
+		wg.Add(1)
+		go func(offset, length int) {
+			defer wg.Done()
+
+			var (
+				xIndex int         = 0
+				yIndex int         = 0
+				c      color.Color = nil
+			)
+
+			for innerOffset := 0; innerOffset < length; innerOffset += 1 {
+				xIndex = (offset + innerOffset) % width
+				yIndex = (offset + innerOffset - xIndex) / width
+
+				c = src.At(xIndex, yIndex)
+				c = d(xIndex, yIndex, c)
+
+				src.Set(xIndex, yIndex, c)
+			}
+		}(cOffset, cLength)
+	}
+
+	wg.Wait()
+}
+
+// Perform a parallel iteration of the pixels of the provided image. For each pixel, execute the delegate function
+// allowing you to read the color and coordinates, the delegate return color will be set at the given coordinates.
+// This changes will be applied to the passed image instance. The integer parameter is the number of clustes into
+// which the image will be devided. Each cluster is then iterated in a separate goroutine. The iteration will break
+// after the first error occurs and the error will be returned.
+func ParallelDistributedReadWriteE(src draw.Image, c int, d ReadWriteErrorableDelegate) error {
+	if src == nil {
+		panic("pimit: the provided image reference is nil")
+	}
+
+	if c <= 0 {
+		panic("pimit: the provided negative or zero distribution cluster size is invalid")
+	}
+
+	if d == nil {
+		panic("pimit: the provided access delegate function is nil")
+	}
+
+	width := src.Bounds().Dx()
+	height := src.Bounds().Dy()
+
+	pCount := width * height
+	cCount := pCount / c
+	cLeft := pCount % c
+
+	wg := &sync.WaitGroup{}
+
+	errt := NewErrorTrap()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for offsetFactor := 0; offsetFactor < c; offsetFactor += 1 {
+		cOffset := cCount * offsetFactor
+		cLength := cCount
+		if offsetFactor+1 == c {
+			cLength += cLeft
+		}
+
+		wg.Add(1)
+		go func(offset, length int) {
+			defer wg.Done()
+
+			var (
+				xIndex int         = 0
+				yIndex int         = 0
+				c      color.Color = nil
+				err    error       = nil
+			)
+
+			for innerOffset := 0; innerOffset < length; innerOffset += 1 {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
+				xIndex = (offset + innerOffset) % width
+				yIndex = (offset + innerOffset - xIndex) / width
+
+				c = src.At(xIndex, yIndex)
+
+				c, err = d(xIndex, yIndex, c)
+				if err != nil {
+					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
+					cancel()
+					return
+				}
+
+				src.Set(xIndex, yIndex, c)
+			}
+		}(cOffset, cLength)
+	}
+
+	wg.Wait()
+	return errt.Err()
+}
+
+// Perform a parallel iteration of the pixels of the provided image. For each pixel, execute the delegate function
+// allowing you to read the color and coordinates, the delegate return color will be set at the given coordinates.
 // This changes will be applied to a new image instance which internaly uses the NRGBA color space and is returned
 // by the function. Each row is iterated in a separate goroutine.
 func ParallelReadWriteNew(src image.Image, d ReadWriteDelegate) draw.Image {
