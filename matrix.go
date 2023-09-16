@@ -8,7 +8,7 @@ import (
 
 // Perform a parallel iteration of the values of the provided matrix represented as a two-dimentional generic slice.
 // For each entry, execute the delegate function allowing you to read the values and coordinates, the delegate return
-// value will be set at the given coordinates. This changes will be aplied to the passed two-dimentional slice instance.
+// value will be set at the given coordinates. This changes will be applied to the passed two-dimentional slice instance.
 // Each column is iterated in a separate goroutine.
 func ParallelMatrixReadWrite[T any](m [][]T, d func(x, y int, value T) T) {
 	if m == nil {
@@ -45,11 +45,11 @@ func ParallelMatrixReadWrite[T any](m [][]T, d func(x, y int, value T) T) {
 	wg.Wait()
 }
 
-// Perform parallel reading and editing of the value of the passed generic matrix, representing the image or
-// its properties. For each pixel, execute the passed access function allowing to read the value and coordinates,
-// which will return the value that the given matrix position should take after this operation. The changes
-// will be applied to the passed matrix slice instance. Every column is iterated in a separate goroutine. Errors
-// that occur in the function will be caught and the first one will be returned by the function.
+// Perform a parallel iteration of the values of the provided matrix represented as a two-dimentional generic slice.
+// For each entry, execute the delegate function allowing you to read the values and coordinates, the delegate return
+// value will be set at the given coordinates. This changes will be applied to the passed two-dimentional slice instance.
+// Each column is iterated in a separate goroutine. The iteration will break after the first error occurs and the error
+// will be returned.
 func ParallelMatrixReadWriteE[T any](m [][]T, d func(x, y int, value T) (T, error)) error {
 	if m == nil {
 		panic("pimit: the provided matrix slice reference is nil")
