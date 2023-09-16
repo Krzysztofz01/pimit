@@ -2,7 +2,9 @@ package pimit
 
 import (
 	"errors"
+	"image"
 	"image/color"
+	"image/draw"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,7 +62,7 @@ func TestParallelReadShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteImage()
+	img := mockWhiteImageImage()
 
 	assert.Panics(t, func() {
 		ParallelRead(img, nil)
@@ -70,7 +72,7 @@ func TestParallelReadShouldPanicOnNilAccessFunc(t *testing.T) {
 func TestParallelReadShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteImage()
+	img := mockWhiteImageImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -103,7 +105,7 @@ func TestParallelReadEShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadEShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteImage()
+	img := mockWhiteImageImage()
 
 	assert.Panics(t, func() {
 		ParallelReadE(img, nil)
@@ -113,7 +115,7 @@ func TestParallelReadEShouldPanicOnNilAccessFunc(t *testing.T) {
 func TestParallelReadEShouldReturnErrorOnAccessError(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteImage()
+	img := mockWhiteImageImage()
 
 	err := ParallelReadE(img, func(xIndex, yIndex int, c color.Color) error {
 		return errors.New("pimit-test: test errror")
@@ -122,10 +124,10 @@ func TestParallelReadEShouldReturnErrorOnAccessError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestPrallelReadEShouldCorrectlyIterate(t *testing.T) {
+func TestParallelReadEShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteImage()
+	img := mockWhiteImageImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -161,17 +163,17 @@ func TestParallelReadWriteShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	assert.Panics(t, func() {
 		ParallelReadWrite(img, nil)
 	})
 }
 
-func TestPrallelReadWriteShouldCorrectlyIterate(t *testing.T) {
+func TestParallelReadWriteShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -192,7 +194,7 @@ func TestPrallelReadWriteShouldCorrectlyIterate(t *testing.T) {
 		return color.Black
 	})
 
-	expectedImage := mockBlackDrawableImage()
+	expectedImage := mockBlackDrawImage()
 
 	assert.Equal(t, expectedImage.Bounds(), img.Bounds())
 
@@ -206,7 +208,7 @@ func TestPrallelReadWriteShouldCorrectlyIterate(t *testing.T) {
 func TestParallelReadWriteShouldAccessPixelsOnce(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	image := mockWhiteDrawableImage()
+	image := mockWhiteDrawImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
 	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
@@ -251,7 +253,7 @@ func TestParallelReadWriteEShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	assert.Panics(t, func() {
 		ParallelReadWriteE(img, nil)
@@ -261,7 +263,7 @@ func TestParallelReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
 func TestParallelReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	err := ParallelReadWriteE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
 		return c, errors.New("pimit-test: test errror")
@@ -270,10 +272,10 @@ func TestParallelReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestPrallelReadWriteEShouldCorrectlyIterate(t *testing.T) {
+func TestParallelReadWriteEShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -294,7 +296,7 @@ func TestPrallelReadWriteEShouldCorrectlyIterate(t *testing.T) {
 		return color.Black, nil
 	})
 
-	expectedImage := mockBlackDrawableImage()
+	expectedImage := mockBlackDrawImage()
 
 	assert.Equal(t, expectedImage.Bounds(), img.Bounds())
 
@@ -308,7 +310,7 @@ func TestPrallelReadWriteEShouldCorrectlyIterate(t *testing.T) {
 func TestParallelReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	image := mockWhiteDrawableImage()
+	image := mockWhiteDrawImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
 	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
@@ -355,17 +357,17 @@ func TestParallelReadWriteNewShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadWriteNewShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	assert.Panics(t, func() {
 		ParallelReadWriteNew(img, nil)
 	})
 }
 
-func TestPrallelReadWriteNewShouldCorrectlyIterate(t *testing.T) {
+func TestParallelReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -386,7 +388,7 @@ func TestPrallelReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 		return color.Black
 	})
 
-	expectedImage := mockBlackDrawableImage()
+	expectedImage := mockBlackDrawImage()
 
 	assert.Equal(t, expectedImage.Bounds(), actualImage.Bounds())
 
@@ -406,7 +408,7 @@ func TestPrallelReadWriteNewShouldCorrectlyIterate(t *testing.T) {
 func TestParallelReadWriteNewShouldAccessPixelsOnce(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	image := mockWhiteDrawableImage()
+	image := mockWhiteDrawImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
 	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
@@ -451,7 +453,7 @@ func TestParallelReadWriteNewEShouldPanicOnNilImage(t *testing.T) {
 func TestParallelReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	assert.Panics(t, func() {
 		ParallelReadWriteNewE(img, nil)
@@ -461,7 +463,7 @@ func TestParallelReadWriteNewEShouldPanicOnNilAccessFunc(t *testing.T) {
 func TestParallelReadWriteNewEShouldReturnErrorOnAccessError(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	modifiedImg, err := ParallelReadWriteNewE(img, func(xIndex, yIndex int, c color.Color) (color.Color, error) {
 		return c, errors.New("pimit-test: test errror")
@@ -471,10 +473,10 @@ func TestParallelReadWriteNewEShouldReturnErrorOnAccessError(t *testing.T) {
 	assert.Nil(t, modifiedImg)
 }
 
-func TestPrallelReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
+func TestParallelReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	img := mockWhiteDrawableImage()
+	img := mockWhiteDrawImage()
 
 	exR, exG, exB, exA := color.White.RGBA()
 
@@ -497,7 +499,7 @@ func TestPrallelReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	expectedImage := mockBlackDrawableImage()
+	expectedImage := mockBlackDrawImage()
 
 	assert.Equal(t, expectedImage.Bounds(), actualImage.Bounds())
 
@@ -517,7 +519,7 @@ func TestPrallelReadWriteNewEShouldCorrectlyIterate(t *testing.T) {
 func TestParallelReadWriteENewShouldAccessPixelsOnce(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	image := mockWhiteDrawableImage()
+	image := mockWhiteDrawImage()
 
 	rBlack, gBlack, bBlack, aBlack := color.Black.RGBA()
 	rWhite, gWhite, bWhite, aWhite := color.White.RGBA()
@@ -549,4 +551,34 @@ func TestParallelReadWriteENewShouldAccessPixelsOnce(t *testing.T) {
 			assert.Equal(t, aBlack, acA)
 		}
 	}
+}
+
+func mockWhiteDrawImage() draw.Image {
+	width, height := 5, 6
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	for x := 0; x < width; x += 1 {
+		for y := 0; y < height; y += 1 {
+			img.Set(x, y, color.White)
+		}
+	}
+
+	return img
+}
+
+func mockWhiteImageImage() image.Image {
+	return mockWhiteDrawImage()
+}
+
+func mockBlackDrawImage() draw.Image {
+	width, height := 5, 6
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	for x := 0; x < width; x += 1 {
+		for y := 0; y < height; y += 1 {
+			img.Set(x, y, color.Black)
+		}
+	}
+
+	return img
 }
