@@ -1,41 +1,43 @@
 package pimit
 
 import (
+	"context"
 	"fmt"
 	"sync"
 )
 
-// Perform parallel reading and editing of the value of the passed generic matrix, representing the image or
-// its properties. For each pixel, execute the passed access function allowing to read the value and coordinates,
-// which will return the value that the given matrix position should take after this operation. The changes
-// will be applied to the passed matrix slice instance. Every column is iterated in a separate goroutine.
-func ParallelMatrixReadWrite[T any](m [][]T, a func(xIndex, yIndex int, value T) T) {
+// Perform a parallel iteration of the values of the provided matrix represented as a two-dimentional generic slice.
+// For each entry, execute the delegate function allowing you to read the values and coordinates, the delegate return
+// value will be set at the given coordinates. This changes will be aplied to the passed two-dimentional slice instance.
+// Each column is iterated in a separate goroutine.
+func ParallelMatrixReadWrite[T any](m [][]T, d func(x, y int, value T) T) {
 	if m == nil {
 		panic("pimit: the provided matrix slice reference is nil")
 	}
 
-	if !isMatrixSizeValid(m) {
-		panic("pimit: the provided matrix slice reference has a invalid size")
+	width, height, ok := getMatrixSize(m)
+	if !ok {
+		panic("pimit: the provided matrix slice has inconsistent lengths")
 	}
 
-	if a == nil {
-		panic("pimit: the provided access function is nil")
+	if d == nil {
+		panic("pimit: the provided access delegate function is nil")
 	}
 
-	width, height := getMatrixDimensions(m)
-
-	wg := sync.WaitGroup{}
-	wg.Add(width)
+	wg := &sync.WaitGroup{}
 
 	for x := 0; x < width; x += 1 {
+		wg.Add(1)
 		go func(xIndex int) {
 			defer wg.Done()
 
-			for yIndex := 0; yIndex < height; yIndex += 1 {
-				value := m[xIndex][yIndex]
-				modifiedValue := a(xIndex, yIndex, value)
+			var value T = *new(T)
 
-				m[xIndex][yIndex] = modifiedValue
+			for yIndex := 0; yIndex < height; yIndex += 1 {
+				value = m[xIndex][yIndex]
+				value = d(xIndex, yIndex, value)
+
+				m[xIndex][yIndex] = value
 			}
 		}(x)
 	}
@@ -48,74 +50,77 @@ func ParallelMatrixReadWrite[T any](m [][]T, a func(xIndex, yIndex int, value T)
 // which will return the value that the given matrix position should take after this operation. The changes
 // will be applied to the passed matrix slice instance. Every column is iterated in a separate goroutine. Errors
 // that occur in the function will be caught and the first one will be returned by the function.
-func ParallelMatrixReadWriteE[T any](m [][]T, a func(xIndex, yIndex int, value T) (T, error)) error {
+func ParallelMatrixReadWriteE[T any](m [][]T, d func(x, y int, value T) (T, error)) error {
 	if m == nil {
 		panic("pimit: the provided matrix slice reference is nil")
 	}
 
-	if !isMatrixSizeValid(m) {
-		panic("pimit: the provided matrix slice reference has a invalid size")
+	width, height, ok := getMatrixSize(m)
+	if !ok {
+		panic("pimit: the provided matrix slice has inconsistent lengths")
 	}
 
-	if a == nil {
-		panic("pimit: the provided access function is nil")
+	if d == nil {
+		panic("pimit: the provided access delegate function is nil")
 	}
 
-	width, height := getMatrixDimensions(m)
+	wg := &sync.WaitGroup{}
 
-	wg := sync.WaitGroup{}
-	wg.Add(width)
-
-	iterationErrors := make(chan error, width)
+	errt := NewErrorTrap()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for x := 0; x < width; x += 1 {
-		go func(xIndex int, errCh chan error) {
+		wg.Add(1)
+		go func(xIndex int) {
 			defer wg.Done()
 
+			var (
+				value T     = *new(T)
+				err   error = nil
+			)
+
 			for yIndex := 0; yIndex < height; yIndex += 1 {
-				value := m[xIndex][yIndex]
-				modifiedValue, err := a(xIndex, yIndex, value)
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
+				value = m[xIndex][yIndex]
+
+				value, err = d(xIndex, yIndex, value)
 				if err != nil {
-					errCh <- fmt.Errorf("pimit: access function failed on x:%d y:%d: %w", xIndex, yIndex, err)
+					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
+					cancel()
 					return
 				}
 
-				m[xIndex][yIndex] = modifiedValue
+				m[xIndex][yIndex] = value
 			}
-		}(x, iterationErrors)
+		}(x)
 	}
 
 	wg.Wait()
-
-	var err error = nil
-	if len(iterationErrors) > 0 {
-		err = <-iterationErrors
-		close(iterationErrors)
-	}
-
-	return err
+	return errt.Err()
 }
 
-func isMatrixSizeValid[T any](m [][]T) bool {
+func getMatrixSize[T any](m [][]T) (int, int, bool) {
 	width := len(m)
 	if width == 0 {
-		return false
+		return 0, 0, false
 	}
 
 	height := len(m[0])
 	if height == 0 {
-		return false
+		return 0, 0, false
 	}
 
 	for x := 1; x < width; x += 1 {
 		if len(m[x]) != height {
-			return false
+			return 0, 0, false
 		}
 	}
 
-	return true
-}
-
-func getMatrixDimensions[T any](m [][]T) (int, int) {
-	return len(m), len(m[0])
+	return width, height, true
 }
