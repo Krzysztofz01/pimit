@@ -28,6 +28,8 @@ func offsetToIndex(offset, width int) (int, int) {
 // function allowing to read the color and coordinates, which will return the color that the pixel should take
 // after this operation. The changes will be applied to the passed image instance. The passed integer is the number
 // of clusters into which the image will be divided. Each cluster is then iterated through a separate goroutine.
+//
+// Deprecated: Use ParallelDistributedReadWrite instead.
 func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess) {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
@@ -82,6 +84,8 @@ func ParallelClusterDistributedReadWrite(i draw.Image, c int, a ReadWriteAccess)
 // after this operation. The changes will be applied to the passed image instance. The passed integer is the number
 // of clusters into which the image will be divided. Each cluster is then iterated through a separate goroutine.
 // Errors that occur in the function will be caught and the first one will be returned by the function.
+//
+// Deprecated: Use ParallelDistributedReadWriteE instead.
 func ParallelClusterDistributedReadWriteE(i draw.Image, c int, a ReadWriteAccessE) error {
 	if i == nil {
 		panic("pimit: the provided image reference is nil")
