@@ -70,7 +70,7 @@ func TestParallelMatrixReadWriteShouldPanicOnInvalidMatrix(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	assert.Panics(t, func() {
-		matrix := mockSpecificMatrix(1, 0, true)
+		matrix := mockCustomMatrix(1, 0, true)
 
 		ParallelMatrixReadWrite(matrix, func(_, _ int, value bool) bool {
 			return value
@@ -81,7 +81,7 @@ func TestParallelMatrixReadWriteShouldPanicOnInvalidMatrix(t *testing.T) {
 func TestParallelMatrixReadWriteShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	matrix := mockSpecificMatrix(2, 3, true)
+	matrix := mockCustomMatrix(2, 3, true)
 
 	assert.Panics(t, func() {
 		ParallelMatrixReadWrite(matrix, nil)
@@ -94,14 +94,14 @@ func TestParallelMatrixReadWriteShouldCorrectlyIterate(t *testing.T) {
 	matWidth := 2
 	matHeight := 3
 
-	matrix := mockSpecificMatrix(matWidth, matHeight, true)
+	matrix := mockCustomMatrix(matWidth, matHeight, true)
 
 	ParallelMatrixReadWrite(matrix, func(_, _ int, value bool) bool {
 		assert.True(t, value)
 		return !value
 	})
 
-	expectedMatrix := mockSpecificMatrix(matWidth, matHeight, false)
+	expectedMatrix := mockCustomMatrix(matWidth, matHeight, false)
 
 	for x := 0; x < matWidth; x += 1 {
 		for y := 0; y < matHeight; y += 1 {
@@ -116,13 +116,13 @@ func TestParallelMatrixReadWriteShouldAccessPixelsOnce(t *testing.T) {
 	matWidth := 2
 	matHeight := 3
 
-	matrix := mockSpecificMatrix(matWidth, matHeight, true)
+	matrix := mockCustomMatrix(matWidth, matHeight, true)
 
 	ParallelMatrixReadWrite(matrix, func(_, _ int, value bool) bool {
 		return !value
 	})
 
-	expectedMatrix := mockSpecificMatrix(matWidth, matHeight, false)
+	expectedMatrix := mockCustomMatrix(matWidth, matHeight, false)
 
 	for x := 0; x < matWidth; x += 1 {
 		for y := 0; y < matHeight; y += 1 {
@@ -145,7 +145,7 @@ func TestParallelMatrixReadWriteEShouldPanicOnInvalidMatrix(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	assert.Panics(t, func() {
-		matrix := mockSpecificMatrix(1, 0, true)
+		matrix := mockCustomMatrix(1, 0, true)
 
 		ParallelMatrixReadWriteE(matrix, func(_, _ int, value bool) (bool, error) {
 			return value, nil
@@ -156,7 +156,7 @@ func TestParallelMatrixReadWriteEShouldPanicOnInvalidMatrix(t *testing.T) {
 func TestParallelMatrixReadWriteEShouldPanicOnNilAccessFunc(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	matrix := mockSpecificMatrix(2, 3, true)
+	matrix := mockCustomMatrix(2, 3, true)
 
 	assert.Panics(t, func() {
 		ParallelMatrixReadWriteE(matrix, nil)
@@ -169,7 +169,7 @@ func TestParallelMatrixReadWriteEShouldCorrectlyIterate(t *testing.T) {
 	matWidth := 2
 	matHeight := 3
 
-	matrix := mockSpecificMatrix(matWidth, matHeight, true)
+	matrix := mockCustomMatrix(matWidth, matHeight, true)
 
 	err := ParallelMatrixReadWriteE(matrix, func(_, _ int, value bool) (bool, error) {
 		assert.True(t, value)
@@ -178,7 +178,7 @@ func TestParallelMatrixReadWriteEShouldCorrectlyIterate(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	expectedMatrix := mockSpecificMatrix(matWidth, matHeight, false)
+	expectedMatrix := mockCustomMatrix(matWidth, matHeight, false)
 
 	for x := 0; x < matWidth; x += 1 {
 		for y := 0; y < matHeight; y += 1 {
@@ -193,7 +193,7 @@ func TestParallelMatrixReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 	matWidth := 2
 	matHeight := 3
 
-	matrix := mockSpecificMatrix(matWidth, matHeight, true)
+	matrix := mockCustomMatrix(matWidth, matHeight, true)
 
 	err := ParallelMatrixReadWriteE(matrix, func(_, _ int, value bool) (bool, error) {
 		return !value, nil
@@ -201,7 +201,7 @@ func TestParallelMatrixReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	expectedMatrix := mockSpecificMatrix(matWidth, matHeight, false)
+	expectedMatrix := mockCustomMatrix(matWidth, matHeight, false)
 
 	for x := 0; x < matWidth; x += 1 {
 		for y := 0; y < matHeight; y += 1 {
@@ -213,11 +213,24 @@ func TestParallelMatrixReadWriteEShouldAccessPixelsOnce(t *testing.T) {
 func TestParallelMatrixReadWriteEShouldReturnErrorOnAccessError(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	matrix := mockSpecificMatrix(2, 3, true)
+	matrix := mockCustomMatrix(2, 3, true)
 
 	err := ParallelMatrixReadWriteE(matrix, func(_, _ int, value bool) (bool, error) {
 		return value, errors.New("pimit-test: test errror")
 	})
 
 	assert.NotNil(t, err)
+}
+
+func mockCustomMatrix[T any](width, height int, value T) [][]T {
+	matrix := make([][]T, width)
+
+	for x := 0; x < width; x += 1 {
+		matrix[x] = make([]T, height)
+		for y := 0; y < height; y += 1 {
+			matrix[x][y] = value
+		}
+	}
+
+	return matrix
 }
