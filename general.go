@@ -64,9 +64,11 @@ func ParallelRead(src image.Image, d ReadDelegate) {
 		go func(yIndex int) {
 			defer wg.Done()
 
+			var c color.Color = nil
+
 			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
-				color := src.At(xIndex, yIndex)
-				d(xIndex, yIndex, color)
+				c = src.At(xIndex, yIndex)
+				d(xIndex, yIndex, c)
 			}
 		}(y)
 	}
@@ -99,6 +101,11 @@ func ParallelReadE(src image.Image, d ReadErrorableDelegate) error {
 		go func(yIndex int) {
 			defer wg.Done()
 
+			var (
+				c   color.Color = nil
+				err error       = nil
+			)
+
 			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
 				select {
 				case <-ctx.Done():
@@ -106,8 +113,8 @@ func ParallelReadE(src image.Image, d ReadErrorableDelegate) error {
 				default:
 				}
 
-				color := src.At(xIndex, yIndex)
-				if err := d(xIndex, yIndex, color); err != nil {
+				c = src.At(xIndex, yIndex)
+				if err = d(xIndex, yIndex, c); err != nil {
 					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
 					cancel()
 					return
@@ -143,10 +150,12 @@ func ParallelReadWrite(src draw.Image, d ReadWriteDelegate) {
 		go func(yIndex int) {
 			defer wg.Done()
 
+			var c color.Color = nil
+
 			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
-				color := src.At(xIndex, yIndex)
-				color = d(xIndex, yIndex, color)
-				src.Set(xIndex, yIndex, color)
+				c = src.At(xIndex, yIndex)
+				c = d(xIndex, yIndex, c)
+				src.Set(xIndex, yIndex, c)
 			}
 		}(y)
 	}
@@ -181,6 +190,11 @@ func ParallelReadWriteE(src draw.Image, d ReadWriteErrorableDelegate) error {
 		go func(yIndex int) {
 			defer wg.Done()
 
+			var (
+				c   color.Color = nil
+				err error       = nil
+			)
+
 			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
 				select {
 				case <-ctx.Done():
@@ -188,8 +202,8 @@ func ParallelReadWriteE(src draw.Image, d ReadWriteErrorableDelegate) error {
 				default:
 				}
 
-				color := src.At(xIndex, yIndex)
-				color, err := d(xIndex, yIndex, color)
+				c = src.At(xIndex, yIndex)
+				c, err = d(xIndex, yIndex, c)
 
 				if err != nil {
 					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
@@ -197,7 +211,7 @@ func ParallelReadWriteE(src draw.Image, d ReadWriteErrorableDelegate) error {
 					return
 				}
 
-				src.Set(xIndex, yIndex, color)
+				src.Set(xIndex, yIndex, c)
 			}
 		}(y)
 	}
@@ -364,11 +378,13 @@ func ParallelReadWriteNew(src image.Image, d ReadWriteDelegate) draw.Image {
 		go func(yIndex int) {
 			defer wg.Done()
 
-			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
-				color := src.At(xIndex, yIndex)
-				color = d(xIndex, yIndex, color)
+			var c color.Color = nil
 
-				dst.Set(xIndex, yIndex, color)
+			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
+				c = src.At(xIndex, yIndex)
+				c = d(xIndex, yIndex, c)
+
+				dst.Set(xIndex, yIndex, c)
 			}
 		}(y)
 	}
@@ -405,6 +421,11 @@ func ParallelReadWriteNewE(src image.Image, d ReadWriteErrorableDelegate) (draw.
 		go func(yIndex int) {
 			defer wg.Done()
 
+			var (
+				c   color.Color = nil
+				err error       = nil
+			)
+
 			for xIndex := 0; xIndex < srcWidth; xIndex += 1 {
 				select {
 				case <-ctx.Done():
@@ -412,8 +433,8 @@ func ParallelReadWriteNewE(src image.Image, d ReadWriteErrorableDelegate) (draw.
 				default:
 				}
 
-				color := src.At(xIndex, yIndex)
-				color, err := d(xIndex, yIndex, color)
+				c = src.At(xIndex, yIndex)
+				c, err = d(xIndex, yIndex, c)
 
 				if err != nil {
 					errt.Set(fmt.Errorf("pimit: delegate function failed on x=%d y=%d with: %w", xIndex, yIndex, err))
@@ -421,7 +442,7 @@ func ParallelReadWriteNewE(src image.Image, d ReadWriteErrorableDelegate) (draw.
 					return
 				}
 
-				dst.Set(xIndex, yIndex, color)
+				dst.Set(xIndex, yIndex, c)
 			}
 		}(y)
 	}
