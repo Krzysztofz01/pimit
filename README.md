@@ -6,9 +6,11 @@
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Krzysztofz01/pimit?include_prereleases)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/Krzysztofz01/pimit)
 
-A minimalist library that adds functionality to wrap logic for concurrent iteration over images. The library contains various types of functions that allow parallel iteration over images for reading or writing. It is also possible to indicate whether the concurrent iteration is to be performed against columns, rows or clusters. Thanks to this library, it is possible to clean up the code fragments in which you perform image processing by separating the parts of the code related to iteration and concurrent operations. Thanks to the concurrent operation of these iterators, it is possible to increase the performance of the algorithm at the expense of a small increase in memory consumption.
+A minimalist library that adds concurrent image pixel iteration functionality wrapped in a convenient and intuitive API. The main idea is that the functions take as a parameter the image whose pixels are to be iterated over, and a function, which is a delegate, that will be executed on each pixel. The library contains a number of functions, some allow only reading, some allow reading as well as editing. Some of the functions make changes to the original image and some create a new instance. Error propagation and iteration interrupts are also possible. In general, for each row of pixels, iteration takes place in a separate goroutine, but it is also possible to choose a function that allows you to select the appropriate number of goroutines. Pimit also allows you to perform iterations on matrices, which are represented as two-dimensional generic slices `[][]T`.
 
-The current state of the library strongly **contradicts the YAGNI rule**, due to the large number of combinations of functions whose functionality is very similar. The library in its current state can not be considered finished. Which functions are most needed and which will remain in the library will become clear after some time of using it.
+The library includes a general API that works on universal types like `image.Image` and `color.Color`, it is more convenient but less efficient and performs more memory allocations, despite this, the operation is expected to perform **2x faster** on average.
+
+The library also includes an API for specific color spaces, it works on image pointers and primitive types e.g.: `*image.RGBA` and `uint8`, these APIs are more verbose but also much more efficient and avoid additional memory allocations. The operation is expected to perform **10x faster** on average.
 
 ## Installation
 ```
@@ -19,40 +21,115 @@ go get -u github.com/Krzysztofz01/pimit
 
 [https://pkg.go.dev/github.com/Krzysztofz01/pimit](https://pkg.go.dev/github.com/Krzysztofz01/pimit)
 
-## Example
-A quick example of iteration over the image with current color printing. The "After" is additionaly handling all the concurrency work and is performing 2x faster on average.
+## Examples
 
-### Before
-```go
-image := CreateExampleImage()
-height := image.Bounds().Dy()
-width := image.Bounds().Dx()
+### Read example: Count all the black pixels in the image.
 
-for y := 0; y < height; y += 1 {
-    for x := 0; x < width; x += 1 {
-        color := image.At(xIndex, yIndex)
-        fmt.Print(color)
+#### Without **pimit** (no concurrecy and more code)
+```golang
+func CountBlackPixel(i image.Image) int {
+    height := image.Bounds().Dy()
+    width := image.Bounds().Dx()
+    count := 0
+    
+    for y := 0; y < height; y += 1 {
+        for x := 0; x < width; x += 1 {
+            color := image.At(xIndex, yIndex)
+            if color == color.Black {
+                count += 1
+            }
+        }
     }
-} 
+    
+    return count
+}
 ```
 
-### After
-```go
-image := CreateExampleImage()
-
-ParallelColumnColorRead(image, func(c color.Color) {
-    fmt.Print(c)
-})
+#### With **pimit**, using the general API
+```golang
+func CountBlackPixel(i image.Image) int {
+    var count int32 = 0
+    
+    pimit.ParallelRead(i, func(x, y int, c color.Color) {
+        if c == color.Black {
+            atomic.AddInt32(&count, 1)
+        }
+    })
+    
+    return int(atomic.LoadInt32(count))
+}
 ```
 
-A quick example of making the picture black and white using parallel row iteration.
-```go
-image := CreateExampleImage()
+#### With **pimit**, using the specific API
+```golang
+func CountBlackPixel(i *image.RGBA) int {
+    var count int32 = 0
+    
+    pimit.ParallelRgbaRead(i, func(x, y int, r, g, b, a uint8) {
+        if 0 == a && a == b && b == c {
+            atomic.AddInt32(&count, 1)
+        }
+    })
+    
+    return int(count)
+}
+```
 
-ParallelRowColorReadWrite(img, func(c color.Color) color.Color {
-    rgb, _ := c.(color.RGBA)
-    value := uint8(0.299*float32(rgb.R) + 0.587*float32(rgb.G) + 0.114*float32(rgb.B))
+### Read/write example: Image to grayscale converting.
 
-    return color.RGBA{value, value, value, 0xff}
-})
+#### Without **pimit** (no concurrecy and more code)
+```golang
+func ToGrayscale(i draw.Image) (image.Image) {
+    height := image.Bounds().Dy()
+    width := image.Bounds().Dx()
+ 
+    for y := 0; y < height; y += 1 {
+        for x := 0; x < width; x += 1 {
+            c := image.At(xIndex, yIndex)
+            rgba, _ := c.(color.RGBA)
+
+            y := uint8(0.299*float32(rgb.R) + 0.587*float32(rgb.G) + 0.114*float32(rgb.B))
+                        
+            i.Set(xIndex, yIndex, color.RGBA{
+                R: y,
+                G: y,
+                B: y,
+                A: rgba.A,
+            })
+        }
+    }
+    
+    return i
+}
+```
+
+#### With **pimit**, using the general API
+```golang
+func ToGrayscale(i draw.Image) image.Image  {
+    pimit.ParallelReadWrite(i, func(x, y int, c color.Color) color.Color {
+        rgba, _ := c.(color.RGBA)
+        y := uint8(0.299*float32(rgb.R) + 0.587*float32(rgb.G) + 0.114*float32(rgb.B))
+                        
+        return color.RGBA{
+            R: y,
+            G: y,
+            B: y,
+            A: rgba.A,
+        })
+    })
+    
+    return i
+}
+```
+
+#### With **pimit**, using the specific API
+```golang
+func ToGrayscale(i *image.RGBA) image.Image {
+    pimit.ParallelRgbaReadWrite(i, func(x, y int, r, g, b, a uint8) (uint8, uint8, uint8, uint8) {
+        y := uint8(0.299*float32(r) + 0.587*float32(g) + 0.114*float32(b))
+        return y, y, y, a
+    })
+    
+    return i
+}
 ```
